@@ -3,9 +3,15 @@
   "version": "0.0.1",
   "description": "It for defining the structure of JSON and validating it",
   "main": "index.js",
+  "scripts": {
+    "lint": "DEBUG=eslint:cli-engine eslint ."
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/iphios/json-schema.git"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "eslint": "^8.11.0"
+  }
 }
