@@ -6,6 +6,7 @@ env:
   node: true
   commonjs: true
   es2022: true
+  jest: true
 extends: eslint:recommended
 parserOptions:
   ecmaVersion: latest
@@ -16,6 +17,7 @@ rules:
   indent:
     - error
     - 2
+    - SwitchCase: 1
   linebreak-style:
     - error
     - unix
@@ -33,10 +35,19 @@ rules:
   no-var: error
   one-var:
     - error
-    - always
+    - let: consecutive
   space-before-function-paren:
     - error
     - never
+  comma-spacing:
+    - error
+    - before: false
+      after: true
+  multiline-comment-style:
+    - error
+    - starred-block
+  camelcase:
+    - error
   comma-dangle:
     - error
     - never
@@ -54,3 +65,12 @@ rules:
     - error
     - ObjectPattern:
         minProperties: 1
+  prefer-object-has-own: error
+  no-console: error
+  prefer-const: error
+  no-multi-str: error
+  no-lonely-if: error
+  no-inline-comments: error
+  no-extra-semi: error
+  no-alert: error
+  dot-notation: error
