@@ -153,7 +153,7 @@ const schemas = {},
 
           // if schema property not exist in data
           if (!Object.hasOwn(data, property)) {
-            if (schema.required.includes(property)) {
+            if (Object.hasOwn(schema, 'required') && schema.required.includes(property)) {
               errs.push({
                 property: property,
                 message: 'Not exist'
