@@ -5,8 +5,8 @@ const {
   JSONSchemaValidationError
 } = require('./custom.class.js');
 
-const schemas = {},
-  is = {
+let schemas = {};
+const is = {
     number: function(val) {
       return Object.hasOwn(Number, 'isFinite') ? Number.isFinite(val) : typeof val === 'number';
     },
@@ -26,10 +26,11 @@ const schemas = {},
       return val instanceof Array && Array.isArray(val);
     }
   },
-  _validator = function(schema, data, errs = []) {
+  _validator = function(schema, data, key = '$', errs = []) {
     if (Object.hasOwn(schema, '$ref')) {
       if (!Object.hasOwn(schemas, schema.$ref)) {
         debug.jsonschema(`"${schema.$ref}" schema does not exist`);
+        return;
       }
       schema = schemas[schema.$ref];
     }
@@ -39,6 +40,7 @@ const schemas = {},
       case 'integer':
         if (!is[schema.type](data)) {
           errs.push({
+            key,
             value: data,
             type: schema.type,
             message: 'Invalid value type'
@@ -47,6 +49,7 @@ const schemas = {},
 
         if (Object.hasOwn(schema, 'values') && !schema.values.includes(data)) {
           errs.push({
+            key,
             value: data,
             values: schema.values,
             message: 'Value does not satisfy allowed values constraint'
@@ -56,6 +59,7 @@ const schemas = {},
         // minimum inclusive
         if (Object.hasOwn(schema, 'minimum') && schema.minimum > data) {
           errs.push({
+            key,
             value: data,
             minimum: schema.minimum,
             message: 'Value does not satisfy minimum constraint'
@@ -65,6 +69,7 @@ const schemas = {},
         // maximum inclusive
         if (Object.hasOwn(schema, 'maximum') && schema.maximum < data) {
           errs.push({
+            key,
             value: data,
             maximum: schema.maximum,
             message: 'Value does not satisfy maximum constraint'
@@ -75,6 +80,7 @@ const schemas = {},
       case 'string':
         if (!is.string(data)) {
           errs.push({
+            key,
             value: data,
             type: schema.type,
             message: 'Invalid value type'
@@ -83,6 +89,7 @@ const schemas = {},
 
         if (Object.hasOwn(schema, 'values') && !schema.values.includes(data)) {
           errs.push({
+            key,
             value: data,
             values: schema.values,
             message: 'Value does not satisfy allowed values constraint'
@@ -92,6 +99,7 @@ const schemas = {},
         // minLength inclusive
         if (Object.hasOwn(schema, 'minLength') && schema.minLength > data.length) {
           errs.push({
+            key,
             value: data,
             minLength: schema.minLength,
             message: 'Value does not satisfy minLength constraint'
@@ -101,6 +109,7 @@ const schemas = {},
         // maxLength inclusive
         if (Object.hasOwn(schema, 'maxLength') && schema.maxLength < data.length) {
           errs.push({
+            key,
             value: data,
             maxLength: schema.maxLength,
             message: 'Value does not satisfy maxLength constraint'
@@ -109,6 +118,7 @@ const schemas = {},
 
         if (Object.hasOwn(schema, 'pattern') && !new RegExp(schema.pattern).test(data)) {
           errs.push({
+            key,
             value: data,
             pattern: schema.pattern,
             message: 'Value does not satisfy pattern constraint'
@@ -118,6 +128,7 @@ const schemas = {},
       case 'boolean':
         if (!is.boolean(data)) {
           errs.push({
+            key,
             value: data,
             type: schema.type,
             message: 'Invalid value type'
@@ -127,6 +138,7 @@ const schemas = {},
       case 'object':
         if (!(is.object(data) && !is.array(data))) {
           errs.push({
+            key,
             value: data,
             type: schema.type,
             message: 'Invalid value type'
@@ -142,7 +154,8 @@ const schemas = {},
         for (const property in data) {
           if (!Object.hasOwn(schema.properties, property)) {
             errs.push({
-              property: property,
+              key,
+              property,
               message: 'Extra property found'
             });
           }
@@ -155,15 +168,16 @@ const schemas = {},
           if (!Object.hasOwn(data, property)) {
             if (Object.hasOwn(schema, 'required') && schema.required.includes(property)) {
               errs.push({
-                property: property,
+                key,
+                property,
                 message: 'Not exist'
               });
             }
             continue;
           }
 
-          const subErrs = _validator(schema.properties[property], data[property]);
-          if (subErrs.length) {
+          const subErrs = _validator(schema.properties[property], data[property], `${key}.${property}`);
+          if (subErrs !== undefined && subErrs.length) {
             errs = Array.prototype.concat.call(errs, subErrs);
           }
         }
@@ -171,6 +185,7 @@ const schemas = {},
       case 'array':
         if (!(is.object(data) && is.array(data))) {
           errs.push({
+            key,
             value: data,
             type: schema.type,
             message: 'Invalid value type'
@@ -183,8 +198,8 @@ const schemas = {},
         }
 
         for (let i = 0; i < data.length; i++) {
-          const subErrs = _validator(schema.items, data[i]);
-          if (subErrs.length) {
+          const subErrs = _validator(schema.items, data[i], `${key}[${i}]`);
+          if (subErrs !== undefined && subErrs.length) {
             errs = Array.prototype.concat.call(errs, subErrs);
           }
         }
@@ -207,6 +222,10 @@ const schemas = {},
   has = function(id) {
     return Object.hasOwn(schemas, id);
   },
+  clear = function() {
+    debug.jsonschema('all schemas cleared');
+    schemas = {};
+  },
   validate = function(id, data) {
     if (!Object.hasOwn(schemas, id)) {
       debug.jsonschema(`schema with "${id}" not exist`);
@@ -222,7 +241,8 @@ const schemas = {},
   };
 
 module.exports = {
-  add: add,
-  has: has,
-  validate: validate
+  add,
+  has,
+  clear,
+  validate
 };
