@@ -3,9 +3,6 @@
 // require packages
 const jsonschema = require('./../index.js');
 const debug = require('./../debug.js');
-const {
-  JSONSchemaValidationError
-} = require('./../custom.class.js');
 
 beforeEach(() => {
   debug.jsonschema = jest.fn();
@@ -14,7 +11,7 @@ beforeEach(() => {
 describe('custom error class', () => {
   it('custom error message', () => {
     const errorMessage = 'test';
-    const errObj = new JSONSchemaValidationError(errorMessage);
+    const errObj = new jsonschema.error(errorMessage);
     expect(errObj.name).toBe('JSONSchemaValidationError');
     expect(errObj.message).toBe(errorMessage);
   });
@@ -65,7 +62,7 @@ describe('json-schema validation', () => {
     try {
       jsonschema.validate(id, '12');
     } catch (err) {
-      expect(err).toBeInstanceOf(JSONSchemaValidationError);
+      expect(err).toBeInstanceOf(jsonschema.error);
       expect(err.message).toBe('[{"key":"$","value":"12","type":"number","message":"Invalid value type"}]');
     }
     expect(debug.jsonschema).toHaveBeenNthCalledWith(1, `schema "${id}" validating`);
@@ -130,7 +127,7 @@ describe('json-schema validation', () => {
       });
 
     } catch (err) {
-      expect(err).toBeInstanceOf(JSONSchemaValidationError);
+      expect(err).toBeInstanceOf(jsonschema.error);
       expect(err.message).toBe('[{"key":"$.array[2]","value":"3","type":"number","message":"Invalid value type"}]');
     } finally {
       jsonschema.clear();
@@ -274,7 +271,7 @@ describe('validating all conditions', () => {
       });
 
     } catch (err) {
-      expect(err).toBeInstanceOf(JSONSchemaValidationError);
+      expect(err).toBeInstanceOf(jsonschema.error);
       expect(err.message).toBe('[{"key":"$","property":"array3","message":"Extra property found"},{"key":"$.integer1","value":0,"values":[1,2,3],"message":"Value does not satisfy allowed values constraint"},{"key":"$.integer2","value":-1,"minimum":0,"message":"Value does not satisfy minimum constraint"},{"key":"$.integer3","value":1,"maximum":0,"message":"Value does not satisfy maximum constraint"},{"key":"$.string1","value":1,"type":"string","message":"Invalid value type"},{"key":"$.string1","value":1,"values":["a","b"],"message":"Value does not satisfy allowed values constraint"},{"key":"$.string2","value":"","minLength":1,"message":"Value does not satisfy minLength constraint"},{"key":"$.string3","value":"ab","maxLength":0,"message":"Value does not satisfy maxLength constraint"},{"key":"$.string4","value":"ab","pattern":{},"message":"Value does not satisfy pattern constraint"},{"key":"$.boolean1","value":0,"type":"boolean","message":"Invalid value type"},{"key":"$.object1","value":1,"type":"object","message":"Invalid value type"},{"key":"$.array1","value":1,"type":"array","message":"Invalid value type"},{"key":"$","property":"array2","message":"Not exist"}]');
     } finally {
       jsonschema.clear();

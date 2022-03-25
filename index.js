@@ -241,6 +241,7 @@ const is = {
   };
 
 module.exports = {
+  error: JSONSchemaValidationError,
   add,
   has,
   clear,
