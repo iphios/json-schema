@@ -238,7 +238,7 @@ describe('validating all conditions', () => {
         },
         string4: {
           type: 'string',
-          pattern: /^[0-9]{1,}$/
+          pattern: '^[0-9]{1,}$'
         },
         boolean1: {
           type: 'boolean'
@@ -272,7 +272,7 @@ describe('validating all conditions', () => {
 
     } catch (err) {
       expect(err).toBeInstanceOf(jsonschema.error);
-      expect(err.message).toBe('[{"key":"$","property":"array3","message":"Extra property found"},{"key":"$.integer1","value":0,"values":[1,2,3],"message":"Value does not satisfy allowed values constraint"},{"key":"$.integer2","value":-1,"minimum":0,"message":"Value does not satisfy minimum constraint"},{"key":"$.integer3","value":1,"maximum":0,"message":"Value does not satisfy maximum constraint"},{"key":"$.string1","value":1,"type":"string","message":"Invalid value type"},{"key":"$.string1","value":1,"values":["a","b"],"message":"Value does not satisfy allowed values constraint"},{"key":"$.string2","value":"","minLength":1,"message":"Value does not satisfy minLength constraint"},{"key":"$.string3","value":"ab","maxLength":0,"message":"Value does not satisfy maxLength constraint"},{"key":"$.string4","value":"ab","pattern":{},"message":"Value does not satisfy pattern constraint"},{"key":"$.boolean1","value":0,"type":"boolean","message":"Invalid value type"},{"key":"$.object1","value":1,"type":"object","message":"Invalid value type"},{"key":"$.array1","value":1,"type":"array","message":"Invalid value type"},{"key":"$","property":"array2","message":"Not exist"}]');
+      expect(err.message).toBe('[{"key":"$","property":"array3","message":"Extra property found"},{"key":"$.integer1","value":0,"values":[1,2,3],"message":"Value does not satisfy allowed values constraint"},{"key":"$.integer2","value":-1,"minimum":0,"message":"Value does not satisfy minimum constraint"},{"key":"$.integer3","value":1,"maximum":0,"message":"Value does not satisfy maximum constraint"},{"key":"$.string1","value":1,"type":"string","message":"Invalid value type"},{"key":"$.string1","value":1,"values":["a","b"],"message":"Value does not satisfy allowed values constraint"},{"key":"$.string2","value":"","minLength":1,"message":"Value does not satisfy minLength constraint"},{"key":"$.string3","value":"ab","maxLength":0,"message":"Value does not satisfy maxLength constraint"},{"key":"$.string4","value":"ab","pattern":"^[0-9]{1,}$","message":"Value does not satisfy pattern constraint"},{"key":"$.boolean1","value":0,"type":"boolean","message":"Invalid value type"},{"key":"$.object1","value":1,"type":"object","message":"Invalid value type"},{"key":"$.array1","value":1,"type":"array","message":"Invalid value type"},{"key":"$","property":"array2","message":"Not exist"}]');
     } finally {
       jsonschema.clear();
     }
