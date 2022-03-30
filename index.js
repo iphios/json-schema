@@ -120,7 +120,7 @@ const is = {
           errs.push({
             key,
             value: data,
-            pattern: schema.pattern,
+            pattern: schema.pattern.toString(),
             message: 'Value does not satisfy pattern constraint'
           });
         }
