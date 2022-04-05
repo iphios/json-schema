@@ -2,7 +2,7 @@
 
 // require packages
 const jsonschema = require('./../index.js');
-const debug = require('./../debug.js');
+const debug = require('./../lib/debug.js');
 
 beforeEach(() => {
   debug.jsonschema = jest.fn();
