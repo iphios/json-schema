@@ -5,8 +5,6 @@ const jsonschema = require('./../index.js');
 const debug = require('./../lib/debug.js');
 
 beforeEach(() => {
-
-  // mock
   debug.jsonschema = jest.fn();
 });
 
@@ -55,7 +53,7 @@ describe('json-schema validation', () => {
 
   it('invalid schema validation', () => {
     const id = 'abc';
-    jsonschema.validate(id);
+    expect(jsonschema.validate(id)).toBe(undefined);
     expect(debug.jsonschema).toHaveBeenNthCalledWith(1, `schema with "${id}" not exist`);
   });
 
@@ -199,6 +197,40 @@ describe('json-schema validation', () => {
       expect(err.message).toBe(JSON.stringify(error));
     }
     jsonschema.clear();
+  });
+});
+
+describe('Number object functions mock', () => {
+  const orignalFun = Object.hasOwn;
+
+  beforeAll(() => {
+    Object.hasOwn = jest.fn((instance, prop) => {
+      if (instance === Number && ['isFinite', 'isInteger'].includes(prop)) {
+        return false;
+      } else {
+        return instance[prop] !== undefined;
+      }
+    });
+  });
+
+  afterAll(() => {
+    Object.hasOwn = orignalFun;
+  });
+
+  it('Number doesn\'t have isFinite', () => {
+    expect(Object.hasOwn(Number, 'isFinite')).toBe(false);
+    jsonschema.add('num', {
+      type: 'number'
+    });
+    expect(jsonschema.validate('num', 1.5)).toBe(undefined);
+  });
+
+  it('Number doesn\'t have isInteger', () => {
+    expect(Object.hasOwn(Number, 'isInteger')).toBe(false);
+    jsonschema.add('int', {
+      type: 'integer'
+    });
+    expect(jsonschema.validate('int', 1)).toBe(undefined);
   });
 });
 
