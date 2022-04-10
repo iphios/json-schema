@@ -5,6 +5,8 @@ const jsonschema = require('./../index.js');
 const debug = require('./../lib/debug.js');
 
 beforeEach(() => {
+
+  // mock
   debug.jsonschema = jest.fn();
 });
 
@@ -125,7 +127,6 @@ describe('json-schema validation', () => {
         type: 'info',
         array: [1, 2, '3']
       });
-
     } catch (err) {
       expect(err).toBeInstanceOf(jsonschema.error);
       expect(err.message).toBe('[{"key":"$.array[2]","value":"3","type":"number","message":"Invalid value type"}]');
@@ -138,8 +139,15 @@ describe('json-schema validation', () => {
     jsonschema.add('invalid_schema_type', {
       type: 'obj'
     });
-    expect(jsonschema.validate('invalid_schema_type'));
-    expect(debug.jsonschema).toHaveBeenNthCalledWith(3, 'unknown schema type given "obj"');
+    try {
+      jsonschema.validate('invalid_schema_type');
+    } catch (err) {
+      expect(err).toBeInstanceOf(jsonschema.error);
+      const error = [{
+        message: 'unknown schema type given "obj"'
+      }];
+      expect(err.message).toBe(JSON.stringify(error));
+    }
     jsonschema.clear();
   });
 
@@ -179,10 +187,17 @@ describe('json-schema validation', () => {
         $ref: 'obj'
       }
     });
-    expect(jsonschema.validate('array', [{
-      value: 12
-    }])).toBe(undefined);
-    expect(debug.jsonschema).toHaveBeenNthCalledWith(4, '"obj" schema does not exist');
+    try {
+      jsonschema.validate('array', [{
+        value: 12
+      }]);
+    } catch (err) {
+      expect(err).toBeInstanceOf(jsonschema.error);
+      const error = [{
+        message: '"obj" schema does not exist'
+      }];
+      expect(err.message).toBe(JSON.stringify(error));
+    }
     jsonschema.clear();
   });
 });
@@ -192,8 +207,15 @@ describe('missing keys check', () => {
     jsonschema.add('object', {
       type: 'object'
     });
-    expect(jsonschema.validate('object', {})).toBe(undefined);
-    expect(debug.jsonschema).toHaveBeenNthCalledWith(3, 'invalid schema, missing "properties" key');
+    try {
+      jsonschema.validate('object', {});
+    } catch (err) {
+      expect(err).toBeInstanceOf(jsonschema.error);
+      const error = [{
+        message: 'invalid schema, missing "properties" key'
+      }];
+      expect(err.message).toBe(JSON.stringify(error));
+    }
     jsonschema.clear();
   });
 
@@ -201,8 +223,15 @@ describe('missing keys check', () => {
     jsonschema.add('array', {
       type: 'array'
     });
-    expect(jsonschema.validate('array', [])).toBe(undefined);
-    expect(debug.jsonschema).toHaveBeenNthCalledWith(3, 'invalid schema, missing "items" key');
+    try {
+      jsonschema.validate('array', []);
+    } catch (err) {
+      expect(err).toBeInstanceOf(jsonschema.error);
+      const error = [{
+        message: 'invalid schema, missing "items" key'
+      }];
+      expect(err.message).toBe(JSON.stringify(error));
+    }
     jsonschema.clear();
   });
 });
@@ -244,13 +273,16 @@ describe('validating all conditions', () => {
           type: 'boolean'
         },
         object1: {
-          type: 'object'
+          type: 'object',
+          properties: {}
         },
         array1: {
-          type: 'array'
+          type: 'array',
+          items: {}
         },
         array2: {
-          type: 'array'
+          type: 'array',
+          items: {}
         }
       },
       required: ['array2']
@@ -269,7 +301,6 @@ describe('validating all conditions', () => {
         array1: 1,
         array3: 1
       });
-
     } catch (err) {
       expect(err).toBeInstanceOf(jsonschema.error);
       expect(err.message).toBe('[{"key":"$","property":"array3","message":"Extra property found"},{"key":"$.integer1","value":0,"values":[1,2,3],"message":"Value does not satisfy allowed values constraint"},{"key":"$.integer2","value":-1,"minimum":0,"message":"Value does not satisfy minimum constraint"},{"key":"$.integer3","value":1,"maximum":0,"message":"Value does not satisfy maximum constraint"},{"key":"$.string1","value":1,"type":"string","message":"Invalid value type"},{"key":"$.string1","value":1,"values":["a","b"],"message":"Value does not satisfy allowed values constraint"},{"key":"$.string2","value":"","minLength":1,"message":"Value does not satisfy minLength constraint"},{"key":"$.string3","value":"ab","maxLength":0,"message":"Value does not satisfy maxLength constraint"},{"key":"$.string4","value":"ab","pattern":"^[0-9]{1,}$","message":"Value does not satisfy pattern constraint"},{"key":"$.boolean1","value":0,"type":"boolean","message":"Invalid value type"},{"key":"$.object1","value":1,"type":"object","message":"Invalid value type"},{"key":"$.array1","value":1,"type":"array","message":"Invalid value type"},{"key":"$","property":"array2","message":"Not exist"}]');
