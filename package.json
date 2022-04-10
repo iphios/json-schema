@@ -7,11 +7,6 @@
     "test": "jest",
     "lint": "DEBUG=eslint:cli,eslint:file-enumerator,eslint:cli-engine,eslint:source-code-fixer eslint . --fix"
   },
-  "jest": {
-    "verbose": true,
-    "collectCoverage": true,
-    "coverageDirectory": "coverage"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/iphios/json-schema.git"
