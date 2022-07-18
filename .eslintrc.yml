@@ -67,6 +67,9 @@ rules:
         minProperties: 1
   prefer-object-has-own: error
   no-console: error
+  no-unused-vars:
+    - error
+    - argsIgnorePattern: "^_"
   prefer-const: error
   no-multi-str: error
   no-lonely-if: error
